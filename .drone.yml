@@ -10,7 +10,7 @@ platform:
 steps:
 - name: build
   pull: always
-  image: rancher/hardened-build-base:v1.16.9b7
+  image: hub.oepkgs.net/rfolabs/hardened-build-base:v1.17.13
   commands:
   - make DRONE_TAG=${DRONE_TAG}
   volumes:
@@ -18,7 +18,7 @@ steps:
     path: /var/run/docker.sock
 
 - name: publish
-  image: rancher/hardened-build-base:v1.16.9b7
+  image: hub.oepkgs.net/rfolabs/hardened-build-base:v1.17.13
   commands:
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
   - make DRONE_TAG=${DRONE_TAG} image-push
@@ -35,7 +35,7 @@ steps:
     - tag
 
 - name: scan
-  image: rancher/hardened-build-base:v1.16.9b7
+  image: hub.oepkgs.net/rfolabs/hardened-build-base:v1.17.13
   commands:
   - make DRONE_TAG=${DRONE_TAG} image-scan
   volumes:
@@ -46,22 +46,31 @@ volumes:
 - name: docker
   host:
     path: /var/run/docker.sock
+
+node:
+  instance: agent-amd64
+
+trigger:
+  event:
+    include:
+    - tag
+
 ---
 kind: pipeline
 type: docker
-name: linux-s390x
+name: linux-arm64
 
 platform:
   os: linux
-  arch: amd64
+  arch: arm64
 
 node:
-  arch: s390x
+  instance: agent-arm64
 
 steps:
 - name: build
   pull: always
-  image: rancher/hardened-build-base:v1.16.9b7
+  image: hub.oepkgs.net/rfolabs/hardened-build-base:v1.17.13
   failure: ignore
   commands:
   - make DRONE_TAG=${DRONE_TAG}
@@ -70,7 +79,7 @@ steps:
     path: /var/run/docker.sock
 
 - name: publish
-  image: rancher/hardened-build-base:v1.16.9b7
+  image: hub.oepkgs.net/rfolabs/hardened-build-base:v1.17.13
   failure: ignore
   commands:
   - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
@@ -91,6 +100,11 @@ volumes:
 - name: docker
   host:
     path: /var/run/docker.sock
+
+trigger:
+  event:
+    include:
+    - tag
 ---
 kind: pipeline
 type: docker
@@ -100,7 +114,7 @@ platform:
   arch: amd64
 steps:
 - name: push
-  image: plugins/manifest:1.2.3
+  image: plugins/manifest
   settings:
     password:
       from_secret: docker_password
@@ -111,7 +125,16 @@ steps:
   when:
     event:
     - tag
+
 depends_on:
 - linux-amd64
-- linux-s390x
+- linux-arm64
+
+node:
+  instance: agent-amd64
+
+trigger:
+  event:
+    include:
+    - tag
 ...

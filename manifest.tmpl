@@ -1,12 +1,12 @@
-image: rancher/hardened-cni-plugins:{{build.tag}}
+image: cnrancher/hardened-cni-plugins:{{build.tag}}
 manifests:
   -
-    image: rancher/hardened-cni-plugins:{{build.tag}}-amd64
+    image: cnrancher/hardened-cni-plugins:{{build.tag}}-amd64
     platform:
       architecture: amd64
       os: linux
   -
-    image: rancher/hardened-cni-plugins:{{build.tag}}-s390x
+    image: cnrancher/hardened-cni-plugins:{{build.tag}}-arm64
     platform:
-      architecture: s390x
+      architecture: arm64
       os: linux
